@@ -9,6 +9,7 @@ import ufrn.bti.models.Banco;
 import ufrn.bti.models.Cliente;
 import ufrn.bti.models.Conta;
 import ufrn.bti.services.BancoService;
+import ufrn.bti.services.CsvService;
 
 @Slf4j
 public class BancoAzul {
@@ -19,9 +20,11 @@ public class BancoAzul {
 
 	public static void main(String[] args) {
 		
-		// Carregar as coisas do csv antes de começar
-		Banco banco = new Banco();
 		BancoService bancoService = new BancoService();
+		CsvService csvService = new CsvService();
+		Banco banco = csvService.lerArquivos();
+		csvService.listarInformacoes(banco);
+		
 		Integer opcao = 0;
 		
 		try(Scanner scan = new Scanner(System.in);) {

@@ -1,7 +1,7 @@
 package ufrn.bti.models;
 
 public enum Agencia {
-    AGENCIA1(("001")), AGENCIA2("002"), AGENCIA3("003");
+    AGENCIA1(("001")), AGENCIA2("002"), AGENCIA3("003"), AGENCIA4("004");
 
     private String numero;
 

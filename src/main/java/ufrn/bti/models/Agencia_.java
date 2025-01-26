@@ -3,8 +3,8 @@ package ufrn.bti.models;
 public class Agencia_ {
 
 	private String id;
-	private Banco banco;
-		
+	private String nome;
+	
 	public String getId() {
 		return id;
 	}
@@ -13,17 +13,17 @@ public class Agencia_ {
 		this.id = id;
 	}
 	
-	public Banco getBanco() {
-		return banco;
+	public String getNome() {
+		return nome;
 	}
 	
-	public void setBanco(Banco banco) {
-		this.banco = banco;
+	public void setNome(String nome) {
+		this.nome = nome;
 	}
 
 	@Override
 	public String toString() {
-		return "Agencia_ [id=" + id + ", banco=" + banco + "]";
+		return id + " - " + nome;
 	}
 	
 }

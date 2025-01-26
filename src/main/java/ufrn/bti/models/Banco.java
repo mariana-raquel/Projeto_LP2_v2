@@ -10,9 +10,12 @@ public class Banco {
 	private String nome;
 	private Cliente usuarioLogado;
 	private List<Cliente> clientes;
+	private List<Agencia_> agencias;
 
 	public Banco() {
+		this.nome = "Banco Azul";
 		this.clientes = Lists.newArrayList();
+		this.agencias = Lists.newArrayList();
 	}
 
 	public Integer getId() {
@@ -25,10 +28,6 @@ public class Banco {
 
 	public String getNome() {
 		return nome;
-	}
-	
-	public void setNome(String nome) {
-		this.nome = nome;
 	}
 
 	public Cliente getUsuarioLogado() {
@@ -43,8 +42,26 @@ public class Banco {
         return clientes;
     }
 
-    public void adicionarCliente(Cliente cliente) {
+    public void setClientes(List<Cliente> clientes) {
+		this.clientes = clientes;
+	}
+
+	public void adicionarCliente(Cliente cliente) {
         this.clientes.add(cliente);
     }
 
+	public List<Agencia_> getAgencias() {
+		return agencias;
+	}
+
+	public void setAgencias(List<Agencia_> agencias) {
+		this.agencias = agencias;
+	}
+
+	@Override
+	public String toString() {
+		return "Banco [id=" + id + ", nome=" + nome + ", usuarioLogado=" + usuarioLogado + ", clientes=" + clientes  + "]";
+	}
+
+    
 }

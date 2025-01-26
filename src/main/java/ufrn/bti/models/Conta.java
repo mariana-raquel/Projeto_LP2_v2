@@ -1,6 +1,10 @@
 package ufrn.bti.models;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.text.NumberFormat;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.Random;
 
@@ -19,15 +23,27 @@ public class Conta {
 	private Cliente usuario;
 	private List<Movimentacao> movimentacoes;
 	private Agencia agencia;
+	private Agencia_ agencia_;
 	private TipoConta tipoConta;
 
 	private Double taxaTransferencia;
 	private Double taxaSaque;
 	
+	private NumberFormat formatarValores;
+	
+	public Conta() {
+		Locale localeBr = Locale.of("pt", "BR");
+		this.formatarValores = NumberFormat.getCurrencyInstance(localeBr);
+		this.saldo = 0.00;
+		this.movimentacoes = Lists.newArrayList();
+	}
+	
 	public Conta(Cliente usuario) throws UsuarioInvalidoException {
 		if (Objects.isNull(usuario.getNome()) || usuario.getNome().isEmpty()) {
 			throw new UsuarioInvalidoException("Nome do usuário não pode ser vazio!");
 		}
+		Locale localeBr = Locale.of("pt", "BR");
+		this.formatarValores = NumberFormat.getCurrencyInstance(localeBr);
 		this.numero = new Random().nextInt(1000, 10000);
 		this.usuario = usuario;
 		this.saldo = 0.00;
@@ -52,9 +68,11 @@ public class Conta {
 		}
 
 		log.info("A taxa de saque é de: R$ {}", this.taxaSaque);
-
-		this.saldo -= valor + (valor * this.taxaSaque);
-		this.movimentacoes.add(new Movimentacao("SAQUE", valor * -1));
+		Double saque = valor + (valor * this.taxaSaque);
+		BigDecimal valorFormatado = BigDecimal.valueOf(saque).setScale(2, RoundingMode.HALF_UP);
+		log.info("\nVocê realizou um saque de {}", this.formatarValores.format(valorFormatado));
+		this.saldo -= saque;
+		this.movimentacoes.add(new Movimentacao("SAQUE", saque * -1));
 	}
 	
 	
@@ -78,6 +96,10 @@ public class Conta {
 			new Movimentacao(String.format("ENTRADA POR TRANSFERENCIA DA CONTA %s - %s", this.numero, this.usuario.getNome()), valor));
 	}
 
+	public void setNumero(Integer numero) {
+		this.numero = numero;
+	}
+	
 	public Integer getNumero() {
 		return numero;
 	}
@@ -113,23 +135,31 @@ public class Conta {
 	public void setAgencia(Agencia agencia) {
 		this.agencia = agencia;
 	}
+	
+	public Agencia_ getAgencia_() {
+		return agencia_;
+	}
 
-	public Double getTaxaTransferencia() {
-		return taxaTransferencia;
+	public void setAgencia_(Agencia_ agencia) {
+		this.agencia_ = agencia;
 	}
 
 	public void setTaxaTransferencia(Double taxaTransferencia) {
 		this.taxaTransferencia = taxaTransferencia;
 	}
 
-	public Double getTaxaSaque() {
-		return taxaSaque;
+	public Double getTaxaTransferencia() {
+		return taxaTransferencia;
 	}
-
+	
 	public void setTaxaSaque(Double taxaSaque) {
 		this.taxaSaque = taxaSaque;
 	}
 
+	public Double getTaxaSaque() {
+		return taxaSaque;
+	}
+	
 	public TipoConta getTipo() {
 		return tipoConta;
 	}
@@ -157,7 +187,8 @@ public class Conta {
 
 	@Override
 	public String toString() {
-		return "Conta [numero=" + numero + ", saldo=" + saldo + "]";
+		BigDecimal saldoFormatado = BigDecimal.valueOf(saldo).setScale(2, RoundingMode.HALF_UP);
+		return "Numero: " + numero + ", Saldo: R$ " + saldoFormatado + ", Agencia: " + agencia + ", Agencia_: " + agencia_ + ", Tipo: " + tipoConta;
 	}
 	
 }

@@ -3,7 +3,6 @@ package ufrn.bti.services;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.Reader;
-import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -16,60 +15,58 @@ import lombok.extern.slf4j.Slf4j;
 import ufrn.bti.models.Agencia;
 import ufrn.bti.models.Agencia_;
 import ufrn.bti.models.Banco;
+import ufrn.bti.models.Cliente;
+import ufrn.bti.models.Conta;
+import ufrn.bti.models.ContaCorrente;
+import ufrn.bti.models.ContaPoupanca;
 
 @Slf4j
 public class CsvService {
 
 	private final static String AGENCIA_PATH = "src/main/resources/agencia.csv";
-    private final static String BANCO_PATH = "src/main/resources/banco.csv";
     private final static String CLIENT_PATH = "src/main/resources/cliente.csv";
     private final static String CONTA_PATH = "src/main/resources/conta.csv";
 
     private final static CSVFormat FORMAT_CSV = CSVFormat.DEFAULT.builder().build();
     
-    
-    public static void main(String[] args) {
-		
-    	List<Banco> bancos = lerArquivoBanco();
-    	List<Agencia_> agencias = lerArquivoAgencia(bancos);
+    public Banco lerArquivos() {
     	
-    	for (Banco banco : bancos) {
-			log.info("{} - {}", banco.getId(), banco.getNome());
-		}
+    	Banco banco = new Banco();
     	
-    	for (Agencia_ agencia : agencias) {
-    		log.info("{} - {}", agencia.getId(), agencia.getBanco().getNome());
-		}
-	}
-    
- 
-    public static List<Banco> lerArquivoBanco() {
-    	List<Banco> bancos = Lists.newArrayList();
+    	List<Agencia_> agencias = lerArquivoAgencia();
+    	List<Cliente> clientes = lerArquivoCliente();
+    	List<Conta> contas = lerArquivoConta(agencias, clientes);
     	
-        try (Reader in = new FileReader(BANCO_PATH)) {
-            Iterable<CSVRecord> records = FORMAT_CSV.parse(in);
-            for (CSVRecord record : records) {
-            	Banco banco = new Banco();
-            	banco.setId(Integer.valueOf(record.get(0)));
-            	banco.setNome(record.get(1));
-            	bancos.add(banco);
-            }
-        } catch (IOException e) {
-            log.error("Erro ao ler arquivo do banco", e);
-        }
-        
-        return bancos;
-    }
-    
-    public static Banco findBanco(Integer idBanco, List<Banco> bancos) {
+    	clientes.forEach(c -> {
+    		contas.forEach(co -> {
+    			if(co.getUsuario().getCpf().equals(c.getCpf())) {
+    				c.adicionarConta(co);
+    			}
+    		});
+    	});
     	
-    	Banco banco = bancos.stream().filter(b -> b.getId().equals(idBanco))
-    			.collect(Collectors.toList()).getFirst();
+    	banco.setClientes(clientes);
+    	banco.setAgencias(agencias);
     	
     	return banco;
     }
     
-    public static List<Agencia_> lerArquivoAgencia(List<Banco> bancos) {
+    
+    public void listarInformacoes(Banco banco) {
+    	
+    	log.info("Clientes:");
+    	banco.getClientes().forEach(c -> {
+    		log.info("{} - {} - {}", c.getNome(), c.getCpf(), c.getSenha());
+    		
+    		for (Conta conta : c.getContas()) {
+    			log.info("{}\n", conta);
+    		}
+    	});
+    	
+    }
+    
+    
+    public static List<Agencia_> lerArquivoAgencia() {
     	List<Agencia_> agencias = Lists.newArrayList();
     	
         try (Reader in = new FileReader(AGENCIA_PATH)) {
@@ -77,7 +74,7 @@ public class CsvService {
             for (CSVRecord record : records) {
             	Agencia_ agencia = new Agencia_();
             	agencia.setId(record.get(0));
-            	agencia.setBanco(findBanco(Integer.valueOf(record.get(1)), bancos));
+            	agencia.setNome(record.get(1));
             	agencias.add(agencia);
             }
         } catch (IOException e) {
@@ -88,42 +85,88 @@ public class CsvService {
     }
     
     
-    public static List<Banco> lerArquivoCliente() {
-    	List<Banco> bancos = Lists.newArrayList();
+    public static List<Cliente> lerArquivoCliente() {
+    	List<Cliente> clientes = Lists.newArrayList();
     	
         try (Reader in = new FileReader(CLIENT_PATH)) {
             Iterable<CSVRecord> records = FORMAT_CSV.parse(in);
             for (CSVRecord record : records) {
-            	Banco banco = new Banco();
-            	banco.setId(Integer.valueOf(record.get(0)));
-            	banco.setNome(record.get(1));
-            	bancos.add(banco);
+            	Cliente cliente = null;
+            	String nome = record.get(0);
+            	String cpf = record.get(1);
+            	String senha = record.get(2);
+            	
+            	try {
+					
+            		cliente = new Cliente(nome, cpf.replaceAll("\\.", "").replaceAll("/", "").replaceAll("-", ""), senha);
+            		clientes.add(cliente);
+            		
+				} catch (Exception e) {
+					log.error("Falha ao criar cliente!", e);
+				}	
             }
+            
         } catch (IOException e) {
             log.error("Erro ao ler arquivo do banco", e);
         }
         
-        return bancos;
+        return clientes;
     }
     
     
-    public static List<Banco> lerArquivoConta() {
-    	List<Banco> bancos = Lists.newArrayList();
+    public static List<Conta> lerArquivoConta(List<Agencia_> agencias, List<Cliente> clientes) {
+    	List<Conta> contas = Lists.newArrayList();
     	
         try (Reader in = new FileReader(CONTA_PATH)) {
             Iterable<CSVRecord> records = FORMAT_CSV.parse(in);
             for (CSVRecord record : records) {
-            	Banco banco = new Banco();
-            	banco.setId(Integer.valueOf(record.get(0)));
-            	banco.setNome(record.get(1));
-            	bancos.add(banco);
+            	Conta conta = null;
+            	
+            	String tipo = record.get(3);
+            	
+            	if(tipo.equals("1")) {
+            		conta = new ContaCorrente();
+            	} else {
+            		conta = new ContaPoupanca();
+            	}
+            	
+            	conta.setNumero(Integer.valueOf(record.get(0)));
+            	conta.setAgencia(Agencia.getAgencia(record.get(1)));
+            	conta.setAgencia_(findAgencia(record.get(1), agencias));
+            	conta.setUsuario(findCliente(record.get(2), clientes));            		            	
+            	conta.setSaldo(Double.valueOf(record.get(4)));
+            	
+            	contas.add(conta);
             }
         } catch (IOException e) {
             log.error("Erro ao ler arquivo do banco", e);
         }
         
-        return bancos;
+        return contas;
     }
     
+    public static Banco findBanco(Integer idBanco, List<Banco> bancos) {
+    	
+    	Banco banco = bancos.stream().filter(b -> b.getId().equals(idBanco))
+    			.collect(Collectors.toList()).getFirst();
+    	
+    	return banco;
+    }
+    
+    public static Agencia_ findAgencia(String idAgencia, List<Agencia_> agencias) {
+    	
+    	Agencia_ agencia = agencias.stream().filter(a -> a.getId().equals(idAgencia))
+    			.collect(Collectors.toList()).getFirst();
+    	
+    	return agencia;
+    }
+    
+    public static Cliente findCliente(String cpf, List<Cliente> clientes) {
+    	
+    	Cliente cliente = clientes.stream().filter(c -> c.getCpf().equals(cpf.replaceAll("\\.", "").replaceAll("/", "").replaceAll("-", "")))
+    			.collect(Collectors.toList()).getFirst();
+    	
+    	return cliente;
+    }
     
 }

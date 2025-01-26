@@ -16,6 +16,7 @@ import ufrn.bti.exceptions.DepositoInvalidoException;
 import ufrn.bti.exceptions.SaqueInvalidoException;
 import ufrn.bti.exceptions.TransferenciaInvalidaException;
 import ufrn.bti.models.Agencia;
+import ufrn.bti.models.Agencia_;
 import ufrn.bti.models.Banco;
 import ufrn.bti.models.Cliente;
 import ufrn.bti.models.Conta;
@@ -132,11 +133,16 @@ public class BancoService {
 					}
 
 					log.info("Selecione a agência da conta:");
+					imprimirAgencias(banco);
 					Agencia.imprimirAgencias();
 					Agencia agencia = null;
+					Agencia_ agencia_ = null;
 					while (agencia == null) {
 						String agenciaCod = scan.nextLine();
 						agencia = Agencia.getAgencia(agenciaCod);
+						
+						agencia_ = banco.getAgencias().stream().filter(a -> a.getId().equals(agenciaCod)).collect(Collectors.toList()).getFirst();
+						
 						if (agencia == null) {
 							log.info("Agência não encontrada! Tente novamente!");
 						}
@@ -149,6 +155,7 @@ public class BancoService {
 					}
 
 					conta.setAgencia(agencia);
+					conta.setAgencia_(agencia_);
 					if (Objects.nonNull(conta)) {
 						usuario.adicionarConta(conta);
 					}
@@ -205,12 +212,10 @@ public class BancoService {
 					valor = Double.valueOf(scan.nextLine());
 				}
 
-				log.info("O valor total a ser descontado do seu saldo é de {}", this.formatarValores.format(valor));
+				log.info("Você deseja sacar um valor de {}", this.formatarValores.format(valor));
 
 				conta.sacar(valor);
-				BigDecimal valorFormatado = BigDecimal.valueOf(valor).setScale(2, RoundingMode.HALF_UP);
 				saldoFormatado = BigDecimal.valueOf(conta.getSaldo()).setScale(2, RoundingMode.HALF_UP);
-				log.info("\nVocê realizou um saque de {}", this.formatarValores.format(valorFormatado));
 				log.info("Seu saldo atual é de {}", this.formatarValores.format(saldoFormatado));
 
 			} else {
@@ -275,9 +280,7 @@ public class BancoService {
 					log.info("Por favor, informe novamente qual valor deseja transferir");
 					valor = Double.valueOf(scan.nextLine());
 				}
-
-				log.info("A taxa de transferência para essa conta é de {}", contaOrigem.getTaxaTransferencia());
-
+				
 				contaOrigem.transferir(contaDestino, valor);
 				BigDecimal valorFormatado = BigDecimal.valueOf(valor).setScale(2, RoundingMode.HALF_UP);
 				saldoFormatado = BigDecimal.valueOf(contaOrigem.getSaldo()).setScale(2, RoundingMode.HALF_UP);
@@ -551,5 +554,13 @@ public class BancoService {
 		}
 		return opcao == 1 ? 0 : 5;
 	}
+	
+	
+	public void imprimirAgencias(Banco banco) {
+        log.info("Agências disponíveis: ");
+        for (Agencia_ agencia : banco.getAgencias()) {
+            log.info("{}- {}", agencia.getId(), agencia.getNome());
+        }
+    }
 
 }
