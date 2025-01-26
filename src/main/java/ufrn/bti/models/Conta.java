@@ -125,6 +125,10 @@ public class Conta {
 	public void setMovimentacoes(List<Movimentacao> movimentacoes) {
 		this.movimentacoes = movimentacoes;
 	}
+	
+	public void adicionarMovimentacoes(Movimentacao movimentacao) {
+		this.movimentacoes.add(movimentacao);
+	}
 
 	public Agencia getAgencia() {
 		return agencia;

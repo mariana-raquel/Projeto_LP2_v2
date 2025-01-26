@@ -23,7 +23,6 @@ public class BancoAzul {
 		BancoService bancoService = new BancoService();
 		CsvService csvService = new CsvService();
 		Banco banco = csvService.lerArquivos();
-		csvService.listarInformacoes(banco);
 		
 		Integer opcao = 0;
 		
@@ -91,7 +90,7 @@ public class BancoAzul {
 		} catch(Exception e) {
 			log.error("Falha nas operações do {}!", banco.getNome(), e);
 		} finally {
-			// TODO: Finalização - dumpar csv
+			csvService.salvarArquivos(banco);
 		}
 		
 	}

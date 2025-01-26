@@ -58,6 +58,7 @@ Link de um tutorial: https://dicasdeprogramacao.com.br/como-configurar-o-lombok-
 
 ## Discente:
 Alissa de Lima Araújo (20230035695)
+
 Mariana Raquel de Morais (20230033690)
 
 
