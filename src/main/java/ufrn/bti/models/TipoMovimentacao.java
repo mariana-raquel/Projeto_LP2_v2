@@ -1,5 +1,14 @@
 package ufrn.bti.models;
 
 public enum TipoMovimentacao {
-	CREDITO, DEBITO, OUTRO
+	DEPOSITO, SAQUE, TRANSFERENCIA;
+	
+	public static TipoMovimentacao getTipoMovimentacao(Integer numero) {
+        for (TipoMovimentacao mov : TipoMovimentacao.values()) {
+            if (mov.ordinal() == numero) {
+                return mov;
+            }
+        }
+        return null;
+    }
 }

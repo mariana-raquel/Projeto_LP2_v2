@@ -57,22 +57,10 @@ Link de um tutorial: https://dicasdeprogramacao.com.br/como-configurar-o-lombok-
 
 
 ## Discente:
+Alissa de Lima Araújo (20230035695)
 Mariana Raquel de Morais (20230033690)
 
 
 
 
 
-
-
-
-
-Funções 2:
-Classe banco tem string de agencia
-Lista de classes de bancos, cada uma sendo uma agencia
-
-classes pra contas com herança
-
-Exceções personalizadas - saldo insuficiente
-
-Salvar todos os dados em arquivo csv

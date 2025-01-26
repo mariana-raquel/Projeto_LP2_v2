@@ -1,51 +1,32 @@
 package ufrn.bti.models;
 
+import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Locale;
 
 public class Movimentacao {
 	 
 	private Date data;
-	private String descricao;
 	private Double valor;
+	private String contaorigem;
+	private String contaDestino;
 	private TipoMovimentacao tipo;
 	
-	public Movimentacao(String descricao, Double valor) {
-		this.data = new Date();
-		this.descricao = descricao;
+	public Movimentacao(Date data, TipoMovimentacao tipoMovim, String contaOrigem, String contaDestino, Double valor) {
+		this.data = data;
+		this.tipo = tipoMovim;
+		this.contaorigem = contaOrigem;
+		this.contaDestino = contaDestino;
 		this.valor = valor;
-		
-		if(valor > 0) {
-			this.tipo = TipoMovimentacao.CREDITO;
-		} else if(valor < 0) {
-			this.tipo = TipoMovimentacao.DEBITO;
-		} else {
-			this.tipo = TipoMovimentacao.OUTRO;
-		}
 	}
-
+	
 	public Date getData() {
 		return data;
 	}
 	
 	public void setData(Date data) {
 		this.data = data;
-	}
-	
-	public String getDescricao() {
-		return descricao;
-	}
-	
-	public void setDescricao(String descricao) {
-		this.descricao = descricao;
-	}
-	
-	public TipoMovimentacao getTipo() {
-		return tipo;
-	}
-	
-	public void setTipo(TipoMovimentacao tipo) {
-		this.tipo = tipo;
 	}
 	
 	public Double getValor() {
@@ -56,10 +37,38 @@ public class Movimentacao {
 		this.valor = valor;
 	}
 	
+	public String getContaorigem() {
+		return contaorigem;
+	}
+	
+	public void setContaorigem(String contaorigem) {
+		this.contaorigem = contaorigem;
+	}
+	
+	public String getContaDestino() {
+		return contaDestino;
+	}
+	
+	public void setContaDestino(String contaDestino) {
+		this.contaDestino = contaDestino;
+	}
+	
+	public TipoMovimentacao getTipo() {
+		return tipo;
+	}
+	
+	public void setTipo(TipoMovimentacao tipo) {
+		this.tipo = tipo;
+	}
+
 	@Override
 	public String toString() {
-		String dt = new SimpleDateFormat("dd/MM/yyyy HH:mm").format(data);
-		return "Movimentacao [data=" + dt + ", descricao=" + descricao + ", tipo=" + tipo + ", valor=" + valor + "]";
+		Locale localeBr = Locale.of("pt", "BR");
+		
+		return "Data: " + new SimpleDateFormat("dd/MM/yyyy HH:mm:ss").format(data) + ", Valor: " + NumberFormat.getCurrencyInstance(localeBr).format(valor) 
+			+ ", Conta Origem: " + contaorigem + ", Conta Destino: " + contaDestino + ", Tipo: " + tipo.name();
 	}
+
+	
 	
 }

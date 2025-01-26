@@ -3,6 +3,7 @@ package ufrn.bti.models;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.text.NumberFormat;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
@@ -55,7 +56,7 @@ public class Conta {
 			throw new DepositoInvalidoException("Você não pode depositar um valor menor ou igual a zero!");
 		}
 		this.saldo += valor;
-		this.movimentacoes.add(new Movimentacao("DEPOSITO", valor));
+		this.movimentacoes.add(new Movimentacao(new Date(), TipoMovimentacao.DEPOSITO, this.numero.toString(), null, valor));
 	}
 	
 	public void sacar(Double valor) throws SaqueInvalidoException {
@@ -72,7 +73,7 @@ public class Conta {
 		BigDecimal valorFormatado = BigDecimal.valueOf(saque).setScale(2, RoundingMode.HALF_UP);
 		log.info("\nVocê realizou um saque de {}", this.formatarValores.format(valorFormatado));
 		this.saldo -= saque;
-		this.movimentacoes.add(new Movimentacao("SAQUE", saque * -1));
+		this.movimentacoes.add(new Movimentacao(new Date(), TipoMovimentacao.SAQUE, this.numero.toString(), null, saque));
 	}
 	
 	
@@ -90,10 +91,7 @@ public class Conta {
 		conta.saldo = conta.saldo + valor;
 		this.saldo -= valor + (valor * this.taxaTransferencia);
 		
-		this.movimentacoes.add(
-			new Movimentacao(String.format("SAIDA POR TRANSFERENCIA PARA CONTA %s - %s",  conta.numero, conta.getUsuario().getNome()), valor * -1));
-		conta.movimentacoes.add(
-			new Movimentacao(String.format("ENTRADA POR TRANSFERENCIA DA CONTA %s - %s", this.numero, this.usuario.getNome()), valor));
+		this.movimentacoes.add(new Movimentacao(new Date(), TipoMovimentacao.TRANSFERENCIA, this.numero.toString(), conta.getNumero().toString(), valor));
 	}
 
 	public void setNumero(Integer numero) {
